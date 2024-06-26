@@ -19,18 +19,18 @@
     </script>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #0CDB9D, #000000);
-            color: white;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            direction: rtl;
-        }
+    font-family: Arial, sans-serif;
+    background: #FF914D url('pencils-bg.png') repeat;
+    color: white;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    direction: rtl;
+}
+
         .container {
             width: 80%;
             max-width: 260px;
@@ -39,10 +39,21 @@
             border-radius: 70px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
             text-align: center;
+            margin-top: 30px;
+            position: relative;
+        }
+        .header {
+            position: sticky;
+            top: 0;
+            background-color: #3B3B3B;
+            padding-top: 20px;
+            padding-bottom: 35px;
+            border-radius: 70px 70px 0 0 0 0;
+            z-index: 10;
         }
         h1, h2 {
             color: white;
-            margin: 100;
+            margin: 20px 0;
         }
         .form-group {
             margin-bottom: 25px;
@@ -61,15 +72,15 @@
         }
         .form-group input:focus {
             outline: none;
-            border-color: #0CDB9D;
+            border-color: #963900;
         }
         .btn {
             width: 50%;
             padding: 15px;
-            background-color: #0CDB9D;
-            border: 4px solid #FFF;
+            background: linear-gradient(270deg, #000, #606060);
+            border: 4px solid #963900;
             border-radius: 30px;
-            color: white;
+            color: #ffffff;
             font-size: 16px;
             cursor: pointer;
             transition: transform 0.2s;
@@ -78,37 +89,67 @@
             transform: scale(1.05);
         }
         .course-list {
-            margin-top: 20px;
+            margin-top: 40px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
+            gap: 30px;
         }
         .course-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .course-circle {
             width: 90px;
             height: 90px;
-            background-color: #0CDB9D;
+            background: linear-gradient(270deg, #000, #606060);
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
-            border-radius: 100%;
-            border: 4px solid #FFF;
-            transition: transform 0.3s;
+            border-radius: 50%;
+            border: 4px solid #963900;
+            transition: transform 0.2s;
         }
-        .course-item:hover {
+        .course-circle:hover {
             transform: scale(1.1);
         }
         .course-item a {
             color: white;
             text-decoration: none;
         }
+        .purchase-date {
+            font-size: 0.75em;
+            margin-top: 5px;
+        }
+        .stars {
+            display: flex;
+            justify-content: center;
+            margin-top: 5px;
+        }
+        .star {
+            font-size: 40px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .star:hover {
+            transform: scale(1.2);
+        }
+        .star.red { color: red; }
+        .star.orange { color: orange; }
+        .star.yellow { color: yellow; }
+        .star.lightgreen { color: lightgreen; }
+        .star.green { color: green; }
+        .star.grey { color: grey; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>הבית לקורסים שלי</h1>
+        <div class="header">
+            <h1>הבית לקורסים שלי</h1>
+        </div>
         <div class="form-group">
             <label for="course-name">שם הקורס החדש:</label>
             <input type="text" id="course-name" required>
@@ -118,13 +159,13 @@
             <input type="url" id="course-link" required>
         </div>
         <button class="btn" onclick="addCourse()">צור</button>
+       <h1>👇</h1>
         <h2>הקורסים שלי:</h2>
         <div class="course-list" id="course-list">
         </div>
     </div>
 
     <script>
-        // Load courses from local storage when the page loads
         document.addEventListener('DOMContentLoaded', (event) => {
             loadCourses();
         });
@@ -132,30 +173,44 @@
         function addCourse() {
             const courseName = document.getElementById('course-name').value;
             const courseLink = document.getElementById('course-link').value;
+            const purchaseDate = new Date().toLocaleDateString();
+            const courseId = Date.now().toString(); // Unique ID for each course
 
             if (courseName && courseLink) {
                 const courseList = document.getElementById('course-list');
                 const courseItem = document.createElement('div');
                 courseItem.className = 'course-item';
+                courseItem.dataset.id = courseId;
+
+                const courseCircle = document.createElement('div');
+                courseCircle.className = 'course-circle';
                 const courseLinkElement = document.createElement('a');
                 courseLinkElement.href = courseLink;
                 courseLinkElement.target = '_blank';
                 courseLinkElement.textContent = courseName;
-                courseItem.appendChild(courseLinkElement);
+                courseCircle.appendChild(courseLinkElement);
+
+                const purchaseDateElement = document.createElement('div');
+                purchaseDateElement.className = 'purchase-date';
+                purchaseDateElement.textContent = `רכש בתאריך: ${purchaseDate}`;
+
+                const starsElement = createStars(courseId);
+
+                courseItem.appendChild(courseCircle);
+                courseItem.appendChild(purchaseDateElement);
+                courseItem.appendChild(starsElement);
                 courseList.appendChild(courseItem);
 
-                // Save course to local storage
-                saveCourse(courseName, courseLink);
+                saveCourse(courseId, courseName, courseLink, purchaseDate);
 
-                // Clear inputs
                 document.getElementById('course-name').value = '';
                 document.getElementById('course-link').value = '';
             }
         }
 
-        function saveCourse(name, link) {
+        function saveCourse(id, name, link, date) {
             let courses = JSON.parse(localStorage.getItem('courses')) || [];
-            courses.push({ name: name, link: link });
+            courses.push({ id: id, name: name, link: link, date: date });
             localStorage.setItem('courses', JSON.stringify(courses));
         }
 
@@ -165,13 +220,73 @@
             courses.forEach(course => {
                 const courseItem = document.createElement('div');
                 courseItem.className = 'course-item';
+                courseItem.dataset.id = course.id;
+
+                const courseCircle = document.createElement('div');
+                courseCircle.className = 'course-circle';
                 const courseLinkElement = document.createElement('a');
                 courseLinkElement.href = course.link;
                 courseLinkElement.target = '_blank';
                 courseLinkElement.textContent = course.name;
-                courseItem.appendChild(courseLinkElement);
+                courseCircle.appendChild(courseLinkElement);
+
+                const purchaseDateElement = document.createElement('div');
+                purchaseDateElement.className = 'purchase-date';
+                purchaseDateElement.textContent = `רכש בתאריך: ${course.date}`;
+
+                const starsElement = createStars(course.id);
+
+                courseItem.appendChild(courseCircle);
+                courseItem.appendChild(purchaseDateElement);
+                courseItem.appendChild(starsElement);
                 courseList.appendChild(courseItem);
+
+                loadRating(course.id);
             });
+        }
+
+        function createStars(courseId) {
+            const starsElement = document.createElement('div');
+            starsElement.className = 'stars';
+            const starColors = ['red', 'orange', 'yellow', 'lightgreen', 'green'];
+
+            starColors.forEach((color, index) => {
+                const star = document.createElement('span');
+                star.className = `star ${color}`;
+                star.textContent = '★';
+                star.addEventListener('click', () => rateCourse(courseId, index + 1));
+                starsElement.appendChild(star);
+            });
+
+            return starsElement;
+        }
+
+        function rateCourse(courseId, rating) {
+            let ratings = JSON.parse(localStorage.getItem('ratings')) || {};
+            ratings[courseId] = rating;
+            localStorage.setItem('ratings', JSON.stringify(ratings));
+
+            updateStars(courseId, rating);
+        }
+
+        function updateStars(courseId, rating) {
+            const courseItem = document.querySelector(`.course-item[data-id="${courseId}"]`);
+            const starsElements = courseItem.querySelectorAll('.star');
+
+            starsElements.forEach((star, index) => {
+                if (index < rating) {
+                    star.style.color = star.classList[1];
+                } else {
+                    star.style.color = 'grey';
+                }
+            });
+        }
+
+        function loadRating(courseId) {
+            let ratings = JSON.parse(localStorage.getItem('ratings')) || {};
+            if (ratings[courseId]) {
+                updateStars(courseId, ratings[courseId]);
+            }
         }
     </script>
 </body>
